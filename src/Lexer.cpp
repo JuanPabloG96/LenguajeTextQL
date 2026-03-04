@@ -33,5 +33,5 @@ void Lexer::classifyChar(char c) {
   case '\'':
     s = lexer::Symbol::ComillasSimples;
   }
-  state = static_cast<int>(s);
+  category = static_cast<int>(s);
 }
