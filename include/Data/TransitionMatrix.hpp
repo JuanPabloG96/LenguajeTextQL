@@ -1,11 +1,12 @@
-#ifndef MATRIZTRANSICION_HPP
-#define MATRIZTRANSICION_HPP
+#ifndef TRANSITIONMATRIX_HPP
+#define TRANSITIONMATRIX_HPP
 
+namespace lexer {
 const int ESTADOS = 116;
 const int SIMBOLOS = 28;
 
 // clang-format off
-enum class Simbolo {
+enum class Symbol {
     Delimitador = 0,
     A, B, C, D, E, F, H, I, L, M, N, O, P, R, S, T, U, Y,
     Cero,
@@ -21,5 +22,6 @@ enum class Simbolo {
     Total
 };
 
-extern const int matriz_transicion[ESTADOS][SIMBOLOS];
+extern const int transitionMatrix[ESTADOS][SIMBOLOS];
+}
 #endif
