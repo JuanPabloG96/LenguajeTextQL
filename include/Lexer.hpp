@@ -1,8 +1,6 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
 
-#include "Data/TransitionMatrix.hpp"
-
 class Lexer {
 private:
   int state;
@@ -10,7 +8,7 @@ private:
 
 public:
   Lexer();
-  lexer::Symbol clasifyChar(char c);
+  void clasifyChar(char c);
 };
 
 #endif

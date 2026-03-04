@@ -1,7 +1,8 @@
-#include "Data.hpp"
+#include "Data/LexerData.hpp"
 
+namespace lexer {
 // clang-format off
-const std::unordered_map<int, std::string> errors = {
+const std::unordered_map<int, std::string> LexicalErrorMessages = {
     {-1, "error de creacion de numero entero"},
     {-2, "error de creacion de numero real"},
     {-3, "error de creacion de numero notacion cientifica"},
@@ -10,7 +11,7 @@ const std::unordered_map<int, std::string> errors = {
     {-6, "error de creacion de cadena"},
     {-7, "error desconocido"}};
 
-const std::unordered_map<int, std::string> acceptance_states = {
+const std::unordered_map<int, std::string> TokenMap = {
     {1000, "numero entero"},
     {2000, "numero real"},
     {3000, "numero notacion_cientifica"},
@@ -37,4 +38,5 @@ const std::unordered_map<int, std::string> acceptance_states = {
     {7018, "si"},
     {7019, "sino"},
     {7020, "y"}};
+}
 // clang-format on

@@ -4,8 +4,14 @@ project(ProyectoTextQL)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-file(GLOB_RECURSE SOURCES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
+     "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
 add_executable(main ${SOURCES})
+
+target_include_directories(main PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+)

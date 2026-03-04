@@ -1,7 +1,8 @@
-#include "MatrizTransicion.hpp"
+#include "Data/TransitionMatrix.hpp"
 
+namespace lexer {
 // clang-format off
-const int matriz_transicion[ESTADOS][SIMBOLOS] = {
+const int transitionMatrix[ESTADOS][SIMBOLOS] = {
     // del  a    b    c    d    e    f    h    i    l    m    n    o    p    r    s    t    u    y    0    dig  .    E    let  _    -    "    '
     {  0,   10,  11,  19,  10,  33,  46,  55,  60,  66,  70,  10,  78,  79,  95,  105, 10,  10,  109, 3,   2,   -7,  10,  10,  -7,  1,   110, 113 }, 
     { -7,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  3,   2,   -1,  -1,  -1,  -1,  -1,  -1,  -1  }, 
@@ -120,3 +121,4 @@ const int matriz_transicion[ESTADOS][SIMBOLOS] = {
     { -5,   -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  115 }, 
     { 5000, -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5,  -5  }  
 };
+}

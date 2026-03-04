@@ -18,7 +18,6 @@ enum class Symbol {
     Menos,
     ComillasDobles,
     ComillasSimples,
-    Error,
     Total
 };
 
