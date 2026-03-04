@@ -8,7 +8,7 @@ private:
 
 public:
   Lexer();
-  void clasifyChar(char c);
+  void classifyChar(char c);
 };
 
 #endif

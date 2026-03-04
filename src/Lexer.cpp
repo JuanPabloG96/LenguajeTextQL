@@ -4,7 +4,7 @@
 
 Lexer::Lexer() : state(0), category(0) {}
 
-void Lexer::clasifyChar(char c) {
+void Lexer::classifyChar(char c) {
   lexer::Symbol s;
   if (std::isspace(c))
     s = lexer::Symbol::Delimitador;
