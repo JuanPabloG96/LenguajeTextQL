@@ -1,0 +1,11 @@
+12
+13.5
+34e89
+43
+'h'
+"hola como estas"
+variable1
+Variable2
+_var
+-34
+-24.5E-3
