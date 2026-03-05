@@ -1,3 +1,4 @@
+#include "Lexer.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -10,6 +11,13 @@ int main() {
   }
 
   char c;
+  Lexer lexer;
+
+  while (archivo.get(c)) {
+    lexer.createTokenList(c);
+  }
+
+  lexer.printTokenList();
 
   archivo.close();
   return 0;
