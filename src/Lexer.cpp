@@ -2,9 +2,10 @@
 #include "Data/LexerData.hpp"
 #include "Data/TransitionMatrix.hpp"
 #include <cctype>
+#include <iomanip>
 #include <iostream>
 
-Lexer::Lexer() : state(0), category(0) {}
+Lexer::Lexer() : state(0), category(0), line(1), column(0) {}
 
 void Lexer::createTokenList(char c) {
   auto symbol = classifyChar(c);
@@ -15,19 +16,26 @@ void Lexer::createTokenList(char c) {
     auto error = lexer::LexicalErrorMessages.find(state);
 
     if (error != lexer::LexicalErrorMessages.end()) {
-      std::cout << error->second << std::endl;
-    } else {
-      std::cout << "Error desconocido";
+      errors.push_back({line, column, error->second, buffer});
     }
+    state = 0;
+    buffer.clear();
   } else if (state >= 1000) {
     auto token = lexer::TokenMap.find(state);
 
-    if (token != lexer::TokenMap.end())
-      TokenList.add(token->second, buffer);
+    if (token != lexer::TokenMap.end()) {
+      auto lexeme = buffer;
+      while (!lexeme.empty() &&
+             (lexeme.back() == ' ' || lexeme.back() == '\n' || lexeme.back() == '\t')) {
+        lexeme.pop_back();
+      }
+      TokenList.add(token->second, lexeme);
+    }
     state = 0;
     buffer.clear();
   } else {
-    buffer += c;
+    if (symbol != lexer::Symbol::Delimitador)
+      buffer += c;
   }
 }
 
@@ -122,4 +130,25 @@ lexer::Symbol Lexer::classifyChar(char c) {
   return lexer::Symbol::Error;
 }
 
-void Lexer::printTokenList() { TokenList.show(); }
+void Lexer::printTokenList() {
+  auto current = TokenList.getHead();
+
+  std::cout << std::endl;
+  std::cout << std::left << std::setw(20) << "#" << std::setw(50) << "Tipo"
+            << "Token" << std::endl;
+
+  std::cout << std::string(100, '-') << std::endl;
+
+  while (current) {
+    std::cout << std::left << std::setw(20) << current->getId() << std::setw(50)
+              << current->getTokenType() << current->getToken() << std::endl;
+
+    current = current->getNext();
+  }
+}
+void Lexer::printErrors() {
+  for (auto error : errors) {
+    std::cout << "Error en la linea " << error.line << ", columna " << error.column << ": "
+              << error.message << " (" << error.lexeme << ")." << std::endl;
+  }
+}
