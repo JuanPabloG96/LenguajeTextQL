@@ -14,6 +14,7 @@ private:
 public:
   Node(std::string tokenType, std::string token);
 
+  int getId() const;
   std::string getToken() const;
   std::string getTokenType() const;
 
