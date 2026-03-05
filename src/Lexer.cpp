@@ -9,11 +9,18 @@ Lexer::Lexer() : state(0), category(0), line(1), column(0) {}
 
 void Lexer::createTokenList(char c) {
   auto symbol = classifyChar(c);
+
+  if (state == 0 && symbol == lexer::Symbol::Delimitador)
+    return;
+
   category = static_cast<int>(symbol);
   state = lexer::transitionMatrix[state][category];
 
+  std::cout << "char: " << c << " state: " << state << " buffer: " << buffer << std::endl;
+
   if (state < 0) {
     auto error = lexer::LexicalErrorMessages.find(state);
+    buffer += c;
 
     if (error != lexer::LexicalErrorMessages.end()) {
       errors.push_back({line, column, error->second, buffer});
@@ -25,18 +32,23 @@ void Lexer::createTokenList(char c) {
 
     if (token != lexer::TokenMap.end()) {
       auto lexeme = buffer;
-      while (!lexeme.empty() &&
-             (lexeme.back() == ' ' || lexeme.back() == '\n' || lexeme.back() == '\t')) {
-        lexeme.pop_back();
-      }
+      // while (!lexeme.empty() &&
+      //        (lexeme.back() == ' ' || lexeme.back() == '\n' || lexeme.back() == '\t')) {
+      //   lexeme.pop_back();
+      // }
       TokenList.add(token->second, lexeme);
     }
     state = 0;
     buffer.clear();
   } else {
-    if (symbol != lexer::Symbol::Delimitador)
-      buffer += c;
+    buffer += c;
   }
+
+  if (c == '\n') {
+    line++;
+    column = 0;
+  } else
+    column++;
 }
 
 lexer::Symbol Lexer::classifyChar(char c) {
@@ -134,13 +146,13 @@ void Lexer::printTokenList() {
   auto current = TokenList.getHead();
 
   std::cout << std::endl;
-  std::cout << std::left << std::setw(20) << "#" << std::setw(50) << "Tipo"
+  std::cout << std::left << std::setw(5) << "#" << std::setw(50) << "Tipo"
             << "Token" << std::endl;
 
-  std::cout << std::string(100, '-') << std::endl;
+  std::cout << std::string(80, '-') << std::endl;
 
   while (current) {
-    std::cout << std::left << std::setw(20) << current->getId() << std::setw(50)
+    std::cout << std::left << std::setw(5) << current->getId() << std::setw(50)
               << current->getTokenType() << current->getToken() << std::endl;
 
     current = current->getNext();
