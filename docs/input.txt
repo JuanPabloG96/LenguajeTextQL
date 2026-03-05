@@ -23,7 +23,6 @@
 ''
 'ab'
 'aa'
-
 "hola"
 "hola mundo"
 "esto es una cadena con espacios"
@@ -32,7 +31,6 @@
 ""
 "cadena sin cerrar
 "otra cerrada"
-
 x
 y1
 var
@@ -44,7 +42,6 @@ temp_123
 123var
 var123
 var_1_2
-
 si
 sino
 mientras
@@ -63,16 +60,13 @@ cadena
 booleano
 y
 o
-
 si (x > 10) entonces
 escribir "valor:" x
 fin
-
 contador = 0
 mientras contador < 10 hacer
 contador = contador + 1
 fin
-
 @
 #
 $
@@ -81,7 +75,6 @@ $
 ~
 `
 |
-
 hola@123
 12..34
 --45
@@ -90,7 +83,6 @@ hola@123
 "cadena rota
 'char roto
 'abcd
-
 _
 __
 ___
@@ -102,4 +94,3 @@ ___
 ...
 """"""
 ''''''
-
