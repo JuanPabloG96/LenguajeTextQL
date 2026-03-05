@@ -3,7 +3,7 @@
 
 namespace lexer {
 const int ESTADOS = 116;
-const int SIMBOLOS = 28;
+const int SIMBOLOS = 29;
 
 // clang-format off
 enum class Symbol {
@@ -18,6 +18,7 @@ enum class Symbol {
     Menos,
     ComillasDobles,
     ComillasSimples,
+    Error,
     Total
 };
 
