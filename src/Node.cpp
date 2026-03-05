@@ -6,8 +6,8 @@ Node::Node(std::string tokenType, std::string token)
   id = currentId++;
 }
 
+int Node::getId() const { return this->id; }
 std::string Node::getToken() const { return this->token; }
-
 std::string Node::getTokenType() const { return this->tokenType; }
 
 Node* Node::getNext() const { return this->next; }
