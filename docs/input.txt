@@ -1,11 +1,105 @@
-12
-13.5
-34e89
-43
-'h'
-"hola como estas"
+0
+123
+00123
+45.67
+0.001
+10.
+.25
+34e5
+2E10
+5e-3
+-45
+-3.14
+-2.5E-8
+12e
+3E
+9.9.9
+
+'a'
+'b'
+'1'
+'_'
+' '
+''
+'ab'
+'aa'
+
+"hola"
+"hola mundo"
+"esto es una cadena con espacios"
+"12345"
+"con_simbolos_123"
+""
+"cadena sin cerrar
+"otra cerrada"
+
+x
+y1
+var
 variable1
 Variable2
 _var
--34
--24.5E-3
+__temp
+temp_123
+123var
+var123
+var_1_2
+
+si
+sino
+mientras
+hacer
+inicio
+fin
+leer
+escribir
+funcion
+retornar
+procedimiento
+para
+entero
+real
+cadena
+booleano
+y
+o
+
+si (x > 10) entonces
+escribir "valor:" x
+fin
+
+contador = 0
+mientras contador < 10 hacer
+contador = contador + 1
+fin
+
+@
+#
+$
+%
+&
+~
+`
+|
+
+hola@123
+12..34
+--45
+++3
+5ee10
+"cadena rota
+'char roto
+'abcd
+
+_
+__
+___
+-
+--
+---
+.
+..
+...
+""""""
+''''''
+
