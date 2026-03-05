@@ -18,6 +18,8 @@ int main() {
   }
 
   lexer.printTokenList();
+  std::cout << std::endl;
+  lexer.printErrors();
 
   archivo.close();
   return 0;
