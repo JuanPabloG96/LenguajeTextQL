@@ -32,10 +32,6 @@ void Lexer::createTokenList(char c) {
 
     if (token != lexer::TokenMap.end()) {
       auto lexeme = buffer;
-      // while (!lexeme.empty() &&
-      //        (lexeme.back() == ' ' || lexeme.back() == '\n' || lexeme.back() == '\t')) {
-      //   lexeme.pop_back();
-      // }
       TokenList.add(token->second, lexeme);
     }
     state = 0;
