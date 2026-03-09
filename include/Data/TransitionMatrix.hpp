@@ -1,7 +1,8 @@
 #ifndef TRANSITIONMATRIX_HPP
 #define TRANSITIONMATRIX_HPP
 
-namespace lexer {
+namespace lexer
+{
 const int ESTADOS = 116;
 const int SIMBOLOS = 29;
 
@@ -15,7 +16,7 @@ enum class Symbol {
     Exponente,
     Letra,
     GuionBajo,
-    Menos,
+    MasMenos,
     ComillasDobles,
     ComillasSimples,
     Error,
