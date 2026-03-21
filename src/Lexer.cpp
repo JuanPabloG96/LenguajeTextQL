@@ -183,7 +183,7 @@ void Lexer::printTokenList()
     auto current = TokenList.getHead();
 
     std::cout << std::endl;
-    std::cout << std::left << std::setw(5) << "#" << std::setw(50) << "Tipo"
+    std::cout << std::left << std::setw(5) << "\n#" << std::setw(50) << "Tipo"
               << "Token" << std::endl;
 
     std::cout << std::string(80, '-') << std::endl;
