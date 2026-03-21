@@ -1,0 +1,19 @@
+fuente registros = abrir("logs/*.log")
+
+esquema formato_salida {
+    texto   ip,
+    texto   metodo,
+    texto   ruta,
+    entero  estado,
+    entero  num_linea  = @linea,
+    texto   origen     = @archivo,
+    texto   creado     = @fecha,
+    lista   historial  = @modificado
+}
+
+funcion extraer_campos() {
+    lista resultado = escanear(registros :: formato_salida)
+        -> $ip, $metodo, $ruta, $estado, $num_linea, $origen
+
+    mostrar resultado
+}

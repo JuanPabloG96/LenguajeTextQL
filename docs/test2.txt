@@ -1,0 +1,24 @@
+fuente registros = abrir("logs/*.log")
+
+esquema formato_salida {
+    texto   ip,
+    texto   ruta,
+    entero  estado,
+    entero  num_linea  = @linea,
+    texto   origen     = @archivo,
+    texto   creado     = @fecha
+}
+
+funcion filtrar_errores() {
+    lista errores = escanear(registros :: formato_salida)
+        donde $estado == 401 || $estado == 403
+        -> $ip, $ruta, $estado, $num_linea, $origen
+
+    si $estado == 500 entonces {
+        mostrar "Error critico detectado."
+    } entonces si $estado == 401 || $estado == 403 entonces {
+        mostrar errores
+    } sino {
+        mostrar "Sin errores de acceso detectados."
+    }
+}

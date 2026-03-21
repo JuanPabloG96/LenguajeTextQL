@@ -1,0 +1,20 @@
+fuente registros = abrir("logs/*.log")
+
+esquema formato_salida {
+    entero  estado,
+    texto   origen     = @archivo,
+    texto   creado     = @fecha,
+    lista   historial  = @modificado
+}
+
+funcion resumen_estados() {
+    lista conteo = escanear(registros :: formato_salida)
+        -> $estado, $origen
+        frecuencia($estado)
+        agrupar por $estado
+        ordenar por conteo desc
+        limite 10
+
+    mostrar conteo
+    exportar conteo => "resumen_estados.csv"
+}
