@@ -1,7 +1,6 @@
 #include "Lexer.hpp"
 #include "Data/LexerData.hpp"
 #include "Data/TransitionMatrix.hpp"
-#include <cctype>
 #include <iomanip>
 #include <iostream>
 
@@ -19,8 +18,8 @@ void Lexer::createTokenList(char c)
     category = static_cast<int>(symbol);
     state = transitionMatrix[state][category];
 
-    std::cout << "Columna: " << category;
-    std::cout << " Estado = " << state << ", ";
+    // std::cout << "Columna: " << category;
+    // std::cout << " Estado = " << state << ", ";
 
     // Si el estado es un error
     if (state < 0)
