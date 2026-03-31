@@ -33,7 +33,7 @@ void Lexer::createTokenList(char c)
 
         if (error != LexicalErrorMessages.end())
         {
-            errors.push_back({line, column, error->second, buffer});
+            errors.push_back({ line, column, error->second, buffer });
         }
 
         state = 0;
@@ -82,7 +82,7 @@ void Lexer::lexerFinish()
     {
         auto error = "Error: no se a cerrado la cadena al final del archivo";
         buffer = buffer.substr(0, buffer.size() - 1);
-        errors.push_back({line, column, error, buffer});
+        errors.push_back({ line, column, error, buffer });
     }
 }
 
