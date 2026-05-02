@@ -23,8 +23,8 @@ const std::unordered_map<int, std::string> TokenMap = {
     {1000, "numero entero"},
     {2000, "numero real"},
     {3000, "identificador"},
-    {4000, "literal caracter"},
-    {5000, "literal cadena"},
+    {4000, "literal_caracter"},
+    {5000, "literal_cadena"},
     // Simbolos (separadores)
     {6001, "abre_parentesis"},   // (
     {6002, "cierra_parentesis"}, // )

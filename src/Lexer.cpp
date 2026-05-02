@@ -87,6 +87,7 @@ void Lexer::lexerFinish() {
     buffer = buffer.substr(0, buffer.size() - 1);
     errors.push_back({line, column, error, buffer});
   }
+  TokenList.add("EOF", "\0");
 }
 
 Symbol Lexer::classifyChar(char c) {
