@@ -5,7 +5,8 @@ const std::unordered_set<std::string> PalabrasReservadas = {
     "abrir", "agrupar", "booleano", "buscar", "caracter", "const", "donde",
     "entero", "entonces", "escanear", "esquema", "exportar", "extraer", "flotante",
     "frecuencia", "fuente", "funcion", "limite", "lista", "mostrar", "normalizar",
-    "ordenar", "puntuacion", "retornar", "si", "sino", "texto", "verdadero", "falso"
+    "ordenar", "puntuacion", "retornar", "si", "sino", "texto", "verdadero", "falso", "por",
+    "asc", "desc"
 };
 
 const std::unordered_map<int, std::string> LexicalErrorMessages = {
@@ -20,8 +21,8 @@ const std::unordered_map<int, std::string> LexicalErrorMessages = {
 
 const std::unordered_map<int, std::string> TokenMap = {
     // Tipos de datos (numeros, caracteres, cadenas, etc.)
-    {1000, "numero entero"},
-    {2000, "numero real"},
+    {1000, "numero_entero"},
+    {2000, "numero_real"},
     {3000, "identificador"},
     {4000, "literal_caracter"},
     {5000, "literal_cadena"},

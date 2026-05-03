@@ -14,7 +14,7 @@ struct LexicalErrors {
 };
 
 class Lexer {
- private:
+private:
   int state;
   int category;
   int line;
@@ -23,12 +23,13 @@ class Lexer {
   List TokenList;
   std::vector<LexicalErrors> errors;
 
- public:
+public:
   Lexer();
-  void analizeFile(std::string& filename);
+  void analizeFile(std::string &filename);
   Symbol classifyChar(char c);
   void createTokenList(char c);
   void lexerFinish();
   void printTokenList();
   void printErrors();
+  List getTokenList();
 };
