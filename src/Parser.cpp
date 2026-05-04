@@ -1,8 +1,8 @@
 #include "Parser.hpp"
 #include <iostream>
 
-Parser::Parser(const List &tokenList)
-    : head(tokenList), current(tokenList.getHead()) {
+Parser::Parser(const List &tokenList) : head(tokenList) {
+  current = head.getHead();
   // clang-format off
   declaracion_map = {
       {"esquema", [this]() { defEsquema(); }},
@@ -15,7 +15,15 @@ Parser::Parser(const List &tokenList)
       {"mostrar",  [this]() { mostrar(); }},
       {"exportar", [this]() { exportar(); }},
       {"retornar", [this]() { retorno(); }},
-      {"identificador", [this]() { asignacion(); }} 
+      {"identificador", [this]() { asignacion(); }}
+  };
+  tipo = {
+    "caracter",
+    "texto", 
+    "entero",
+    "flotante",
+    "booleano",
+    "lista"
   };
   tipo_pipeline = {
     "frecuencia",
@@ -40,7 +48,6 @@ void Parser::advance() {
 void Parser::parse() { statements(); }
 
 void Parser::statements() {
-  std::cout << current->getToken() << std::endl;
   if (current == nullptr || match("EOF"))
     return;
 
@@ -49,7 +56,7 @@ void Parser::statements() {
   if (declaracion_map.contains(tipo)) {
     declaracion();
     statements();
-  } else if (sentencia_map.contains(tipo)) {
+  } else if (sentencia_map.contains(tipo) || tipo.contains(tipo)) {
     sentencia();
     statements();
   } else {
@@ -61,40 +68,45 @@ void Parser::statements() {
 }
 
 void Parser::declaracion() { declaracion_map[current->getTokenType()](); }
-void Parser::sentencia() { sentencia_map[current->getTokenType()](); }
+void Parser::sentencia() {
+  std::string tipo = current->getTokenType();
+  if (tipo.contains(tipo)) {
+    asignacion();
+  } else
+    sentencia_map[current->getTokenType()]();
+}
 
 void Parser::sentencias() {
-  std::cout << current->getToken() << std::endl;
-  if (sentencia_map.contains(current->getTokenType())) {
-    sentencia_map[current->getTokenType()]();
+  if (sentencia_map.contains(current->getTokenType()) ||
+      tipo.contains(current->getTokenType())) {
+    if (tipo.contains(current->getTokenType()))
+      asignacion();
+    else
+      sentencia_map[current->getTokenType()]();
     advance();
     sentencias();
   }
 }
 
 void Parser::defEsquema() {
-  std::cout << current->getToken() << std::endl;
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de 'esquema'\n";
-    return;
   }
   advance();
   if (!match("abre_llave")) {
     std::cerr << "Error: se esperaba '{' en definicion de esquema\n";
-    return;
   }
   advance();
   campos();
   if (!match("cierra_llave")) {
     std::cerr << "Error: se esperaba '}' al cerrar esquema\n";
-    return;
   }
   advance();
 }
 
 void Parser::campos() {
-  std::cout << current->getToken() << std::endl;
+
   campo();
   while (match("coma")) {
     advance();
@@ -103,18 +115,15 @@ void Parser::campos() {
 }
 
 void Parser::campo() {
-  std::cout << current->getToken() << std::endl;
   std::string tipo = current->getTokenType();
   if (tipo != "caracter" && tipo != "texto" && tipo != "entero" &&
       tipo != "flotante" && tipo != "booleano" && tipo != "lista") {
     std::cerr << "Error: se esperaba tipo campo, se encontro: '" << tipo
               << "'\n";
-    return;
   }
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues del tipo\n";
-    return;
   }
   advance();
   if (match("=")) {
@@ -124,39 +133,32 @@ void Parser::campo() {
 }
 
 void Parser::fuenteCampo() {
-  std::cout << current->getToken() << std::endl;
   if (current->getTokenType() == "columna") {
     advance();
     if (!match("abre_parentesis")) {
       std::cerr << "Error: se esperaba '(' despues de 'columna'\n";
-      return;
     }
     advance();
     if (!match("numero_entero")) {
       std::cerr << "Error: se esperaba numero en 'columna'\n";
-      return;
     }
     advance();
     if (!match("cierra_parentesis")) {
       std::cerr << "Error: se esperaba ')' al cerrar 'columna'\n";
-      return;
     }
     advance();
   } else if (current->getTokenType() == "regex") {
     advance();
     if (!match("abre_parentesis")) {
       std::cerr << "Error: se esperaba '(' despues de 'regex'\n";
-      return;
     }
     advance();
     if (!match("literal_cadena")) {
       std::cerr << "Error: se esperaba cadena en 'regex'\n";
-      return;
     }
     advance();
     if (!match("cierra_parentesis")) {
       std::cerr << "Error: se esperaba ')' al cerrar 'regex'\n";
-      return;
     }
     advance();
   } else if (match("@")) {
@@ -168,16 +170,13 @@ void Parser::fuenteCampo() {
 }
 
 void Parser::defFuncion() {
-  std::cout << current->getToken() << std::endl;
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de 'funcion'\n";
-    return;
   }
   advance();
   if (!match("abre_parentesis")) {
     std::cerr << "Error: se esperaba '(' en definicion de funcion\n";
-    return;
   }
   advance();
   if (match("identificador")) {
@@ -185,18 +184,15 @@ void Parser::defFuncion() {
   }
   if (!match("cierra_parentesis")) {
     std::cerr << "Error: se esperaba ')' en definicion de funcion\n";
-    return;
   }
   advance();
   if (!match("abre_llave")) {
     std::cerr << "Error: se esperaba '{' en cuerpo de funcion\n";
-    return;
   }
   advance();
   sentencias();
   if (!match("cierra_llave")) {
     std::cerr << "Error: se esperaba '}' al cerrar funcion\n";
-    return;
   }
   advance();
 }
@@ -207,7 +203,6 @@ void Parser::parametros() {
     advance();
     if (!match("identificador")) {
       std::cerr << "Error: se esperaba identificador despues de ','\n";
-      return;
     }
     advance();
   }
@@ -217,41 +212,42 @@ void Parser::asignacionFuente() {
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de 'fuente'\n";
-    return;
   }
   advance();
   if (!match("=")) {
     std::cerr << "Error: se esperaba '=' en asignacion de fuente\n";
-    return;
   }
   advance();
   if (!match("abrir")) {
     std::cerr << "Error: se esperaba 'abrir' en asignacion de fuente\n";
-    return;
   }
   advance();
   if (!match("abre_parentesis")) {
     std::cerr << "Error: se esperaba '(' despues de 'abrir'\n";
-    return;
   }
   advance();
   if (!match("literal_cadena")) {
     std::cerr << "Error: se esperaba cadena en 'abrir'\n";
-    return;
   }
   advance();
   if (!match("cierra_parentesis")) {
     std::cerr << "Error: se esperaba ')' al cerrar 'abrir'\n";
-    return;
   }
   advance();
 }
 
 void Parser::asignacion() {
+  std::string tipo = current->getTokenType();
+  if (tipo.contains(tipo)) {
+    advance();
+  }
+  if (!match("identificador")) {
+    std::cerr << "Error se esperaba un identificador en asignacion"
+              << std::endl;
+  }
   advance();
   if (!match("=")) {
     std::cerr << "Error: se esperaba '=' en asignacion\n";
-    return;
   }
   advance();
   expresion();
@@ -262,18 +258,15 @@ void Parser::condicional() {
   expresion();
   if (current->getTokenType() != "entonces") {
     std::cerr << "Error: se esperaba 'entonces' despues de condicion\n";
-    return;
   }
   advance();
   if (!match("abre_llave")) {
     std::cerr << "Error: se esperaba '{' en condicional\n";
-    return;
   }
   advance();
   sentencias();
   if (!match("cierra_llave")) {
     std::cerr << "Error: se esperaba '}' al cerrar condicional\n";
-    return;
   }
   advance();
   sino();
@@ -284,37 +277,31 @@ void Parser::sino() {
     advance();
     if (!match("abre_llave")) {
       std::cerr << "Error: se esperaba '{' despues de 'sino'\n";
-      return;
     }
     advance();
     sentencias();
     if (!match("cierra_llave")) {
       std::cerr << "Error: se esperaba '}' al cerrar 'sino'\n";
-      return;
     }
     advance();
   } else if (current->getTokenType() == "entonces") {
     advance();
     if (current->getTokenType() != "si") {
       std::cerr << "Error: se esperaba 'si' despues de 'entonces'\n";
-      return;
     }
     advance();
     expresion();
     if (current->getTokenType() != "entonces") {
       std::cerr << "Error: se esperaba 'entonces' despues de condicion\n";
-      return;
     }
     advance();
     if (!match("abre_llave")) {
       std::cerr << "Error: se esperaba '{'\n";
-      return;
     }
     advance();
     sentencias();
     if (!match("cierra_llave")) {
       std::cerr << "Error: se esperaba '}'\n";
-      return;
     }
     advance();
     sino();
@@ -325,27 +312,22 @@ void Parser::escanear() {
   advance();
   if (!match("abre_parentesis")) {
     std::cerr << "Error: se esperaba '(' despues de 'escanear'\n";
-    return;
   }
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador en 'escanear'\n";
-    return;
   }
   advance();
   if (!match("::")) {
     std::cerr << "Error: se esperaba '::' en 'escanear'\n";
-    return;
   }
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de '::'\n";
-    return;
   }
   advance();
   if (!match("cierra_parentesis")) {
     std::cerr << "Error: se esperaba ')' al cerrar 'escanear'\n";
-    return;
   }
   advance();
   cuerpoEscanear();
@@ -409,20 +391,17 @@ void Parser::pipelineOp() {
     advance();
     if (!match("abre_parentesis")) {
       std::cerr << "Error: se esperaba '(' despues de 'frecuencia'\n";
-      return;
     }
     advance();
     contextoOId();
     if (!match("cierra_parentesis")) {
       std::cerr << "Error: se esperaba ')' al cerrar 'frecuencia'\n";
-      return;
     }
     advance();
   } else if (tipo == "agrupar") {
     advance();
     if (current->getTokenType() != "por") {
       std::cerr << "Error: se esperaba 'por' despues de 'agrupar'\n";
-      return;
     }
     advance();
     contextoOId();
@@ -430,7 +409,6 @@ void Parser::pipelineOp() {
     advance();
     if (current->getTokenType() != "por") {
       std::cerr << "Error: se esperaba 'por' despues de 'ordenar'\n";
-      return;
     }
     advance();
     contextoOId();
@@ -445,7 +423,6 @@ void Parser::pipelineOp() {
     advance();
     if (!match("numero_entero")) {
       std::cerr << "Error: se esperaba numero despues de 'limite'\n";
-      return;
     }
     advance();
   }
@@ -460,17 +437,14 @@ void Parser::exportar() {
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de 'exportar'\n";
-    return;
   }
   advance();
   if (!match("=>")) {
     std::cerr << "Error: se esperaba '=>' en exportar\n";
-    return;
   }
   advance();
   if (!match("literal_cadena")) {
     std::cerr << "Error: se esperaba cadena en exportar\n";
-    return;
   }
   advance();
 }
@@ -503,7 +477,6 @@ void Parser::factor() {
     expresion();
     if (!match("cierra_parentesis")) {
       std::cerr << "Error: se esperaba ')' al cerrar expresion\n";
-      return;
     }
     advance();
   } else if (match("numero_entero") || match("numero_real")) {
@@ -516,6 +489,8 @@ void Parser::factor() {
     metadato();
   } else if (match("identificador")) {
     advance();
+  } else if (match("escanear")) {
+    escanear();
   } else {
     std::cerr << "Error: factor invalido: '" << current->getTokenType()
               << "'\n";
@@ -527,7 +502,6 @@ void Parser::metadato() {
   advance();
   if (!match("identificador")) {
     std::cerr << "Error: se esperaba identificador despues de '@'\n";
-    return;
   }
   advance();
 }

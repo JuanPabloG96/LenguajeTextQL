@@ -203,4 +203,4 @@ void Lexer::printErrors() {
   std::cout << "\n";
 }
 
-List Lexer::getTokenList() { return this->TokenList; }
+const List& Lexer::getTokenList() const { return this->TokenList; }

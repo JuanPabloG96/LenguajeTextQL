@@ -13,6 +13,7 @@ private:
 
   std::unordered_map<std::string, std::function<void()>> declaracion_map;
   std::unordered_map<std::string, std::function<void()>> sentencia_map;
+  std::set<std::string> tipo;
   std::set<std::string> tipo_pipeline;
 
   void statements();

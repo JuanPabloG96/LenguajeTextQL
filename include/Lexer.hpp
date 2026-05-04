@@ -31,5 +31,5 @@ public:
   void lexerFinish();
   void printTokenList();
   void printErrors();
-  List getTokenList();
+  const List& getTokenList() const;
 };
