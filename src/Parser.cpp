@@ -42,9 +42,9 @@ bool Parser::match(const std::string& type) {
   return current != nullptr && current->getTokenType() == type;
 }
 void Parser::advance() {
+  std::cout << "token actual: " << current->getToken() << std::endl;
   if (current != nullptr && !match("EOF"))
     current = current->getNext();
-  std::cout << "token actual: " << current->getToken() << std::endl;
 }
 void Parser::actualizar_tipo() {
   tipo_actual = current->getTokenType();
@@ -221,9 +221,9 @@ void Parser::parametros() {
 }
 void Parser::sentencias() {
   actualizar_tipo();
-  while (sentencia_map.contains(tipo_actual) || tipo.contains(tipo_actual)) {
+  if (sentencia_map.contains(tipo_actual) || tipo.contains(tipo_actual)) {
     sentencia();
-    actualizar_tipo();
+    sentencias();
   }
 }
 
@@ -409,6 +409,7 @@ void Parser::pipeline() {
   actualizar_tipo();
   while (tipo_pipeline.contains(tipo_actual)) {
     pipelineOp();
+    actualizar_tipo();
   }
 }
 void Parser::pipelineOp() {
@@ -421,29 +422,26 @@ void Parser::pipelineOp() {
     if (!match("cierra_parentesis"))
       error(")", "pipelineOp", "simbolo");
     advance();
-  }
-  if (match("agrupar")) {
+  } else if (match("agrupar")) {
     advance();
     if (!match("por"))
       error("por", "pipelineOp", "palabra reservada");
     advance();
     contextoOId();
-  }
-  if (match("ordenar")) {
+  } else if (match("ordenar")) {
     advance();
     if (!match("por"))
       error("por", "pipelineOp", "palabra reservada");
     advance();
+    contextoOId();
     if (match("asc") || match("desc"))
       advance();
-  }
-  if (match("limite")) {
+  } else if (match("limite")) {
     advance();
     if (!match("numero_entero"))
       error("numero entero", "pipelineOp", "tipo de dato");
     advance();
-  }
-  if (match("normalizar") || match("puntuacion"))
+  } else if (match("normalizar") || match("puntuacion"))
     advance();
 }
 void Parser::contexto() {
