@@ -2,8 +2,12 @@
 
 #include <string>
 
-Node::Node(std::string tokenType, std::string token)
-    : tokenType(tokenType), token(token), next(nullptr) {
+Node::Node(std::string tokenType, std::string token, int line, int column)
+    : tokenType(tokenType),
+      token(token),
+      next(nullptr),
+      line(line),
+      column(column) {
   id = currentId++;
 }
 
@@ -15,6 +19,13 @@ std::string Node::getToken() const {
 }
 std::string Node::getTokenType() const {
   return this->tokenType;
+}
+
+int Node::getLine() const {
+  return this->line;
+}
+int Node::getColumn() const {
+  return this->column;
 }
 
 Node* Node::getNext() const {

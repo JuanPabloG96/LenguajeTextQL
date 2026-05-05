@@ -15,8 +15,8 @@ List::~List() {
   }
 }
 
-void List::add(std::string type, std::string token) {
-  Node* n = new Node(type, token);
+void List::add(std::string type, std::string token, int line, int column) {
+  Node* n = new Node(type, token, line, column);
 
   if (!head) {
     head = current = n;

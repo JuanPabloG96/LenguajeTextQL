@@ -1,7 +1,9 @@
 #include "Parser.hpp"
+
+#include <cstdlib>
 #include <iostream>
 
-Parser::Parser(const List &tokenList) : head(tokenList) {
+Parser::Parser(const List& tokenList) : head(tokenList) {
   current = head.getHead();
   // clang-format off
   declaracion_map = {
@@ -11,7 +13,6 @@ Parser::Parser(const List &tokenList) : head(tokenList) {
   };
   sentencia_map = {
       {"si",       [this]() { condicional(); }},
-      {"escanear", [this]() { escanear(); }},
       {"mostrar",  [this]() { mostrar(); }},
       {"exportar", [this]() { exportar(); }},
       {"retornar", [this]() { retorno(); }},
@@ -36,77 +37,110 @@ Parser::Parser(const List &tokenList) : head(tokenList) {
   // clang-format on
 }
 
-bool Parser::match(const std::string &type) {
+// funciones auxiliares
+bool Parser::match(const std::string& type) {
   return current != nullptr && current->getTokenType() == type;
 }
-
 void Parser::advance() {
   if (current != nullptr && !match("EOF"))
     current = current->getNext();
+  std::cout << "token actual: " << current->getToken() << std::endl;
+}
+void Parser::actualizar_tipo() {
+  tipo_actual = current->getTokenType();
+}
+void Parser::error(std::string esperado,
+                   std::string funcion,
+                   std::string tipo = "") {
+  std::cerr << "(" << funcion << ") " << "Error, se esperaba " << tipo << " '"
+            << esperado << "', en linea " << current->getLine() << " columna "
+            << current->getColumn() << ", Token: " << current->getToken()
+            << std::endl;
+  std::exit(0);
 }
 
-void Parser::parse() { statements(); }
+// funciones del parser
+void Parser::parse() {
+  statements();
+}
 
 void Parser::statements() {
   if (current == nullptr || match("EOF"))
     return;
 
-  std::string tipo = current->getTokenType();
+  actualizar_tipo();
 
-  if (declaracion_map.contains(tipo)) {
+  if (declaracion_map.contains(tipo_actual)) {
     declaracion();
     statements();
-  } else if (sentencia_map.contains(tipo) || tipo.contains(tipo)) {
+  } else if (sentencia_map.contains(tipo_actual) ||
+             tipo.contains(tipo_actual)) {
     sentencia();
     statements();
   } else {
-    std::cerr << "Error: token inesperado: '" << current->getTokenType()
-              << "'\n";
-    advance();
-    statements();
+    std::cerr << "Error de token no reconocido, en linea " << current->getLine()
+              << " columna " << current->getColumn()
+              << ", Token: " << current->getToken() << std::endl;
   }
 }
 
-void Parser::declaracion() { declaracion_map[current->getTokenType()](); }
-void Parser::sentencia() {
-  std::string tipo = current->getTokenType();
-  if (tipo.contains(tipo)) {
-    asignacion();
-  } else
-    sentencia_map[current->getTokenType()]();
+void Parser::declaracion() {
+  actualizar_tipo();
+  declaracion_map[tipo_actual]();
 }
 
-void Parser::sentencias() {
-  if (sentencia_map.contains(current->getTokenType()) ||
-      tipo.contains(current->getTokenType())) {
-    if (tipo.contains(current->getTokenType()))
-      asignacion();
-    else
-      sentencia_map[current->getTokenType()]();
-    advance();
-    sentencias();
+void Parser::asignacionFuente() {
+  if (!match("fuente")) {
+    error("fuente", "asignacionFuente", "palabra reservada");
   }
+  advance();
+  if (!match("identificador")) {
+    error("identificador", "asignacionFuente");
+  }
+  advance();
+  if (!match("=")) {
+    error("=", "asignacionFuente", "simbolo");
+  }
+  advance();
+  if (!match("abrir")) {
+    error("abrir", "asignacionFuente", "palabra reservada");
+  }
+  advance();
+  if (!match("abre_parentesis")) {
+    error("(", "asignacionFuente", "simbolo");
+  }
+  advance();
+  if (!match("literal_cadena")) {
+    error("literal cadena", "asignacionFuente", "tipo de dato");
+  }
+  advance();
+  if (!match("cierra_parentesis")) {
+    error(")", "asignacionFuente", "simbolo");
+  }
+  advance();
 }
 
 void Parser::defEsquema() {
+  if (!match("esquema")) {
+    error("esquema", "defEsquema", "palabra reservada");
+  }
   advance();
   if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de 'esquema'\n";
+    error("identificador", "defEsquema");
   }
   advance();
   if (!match("abre_llave")) {
-    std::cerr << "Error: se esperaba '{' en definicion de esquema\n";
+    error("{", "defEsquema", "simbolo");
   }
   advance();
   campos();
   if (!match("cierra_llave")) {
-    std::cerr << "Error: se esperaba '}' al cerrar esquema\n";
+    error("}", "defEsquema", "simbolo");
   }
   advance();
 }
 
 void Parser::campos() {
-
   campo();
   while (match("coma")) {
     advance();
@@ -115,15 +149,13 @@ void Parser::campos() {
 }
 
 void Parser::campo() {
-  std::string tipo = current->getTokenType();
-  if (tipo != "caracter" && tipo != "texto" && tipo != "entero" &&
-      tipo != "flotante" && tipo != "booleano" && tipo != "lista") {
-    std::cerr << "Error: se esperaba tipo campo, se encontro: '" << tipo
-              << "'\n";
+  actualizar_tipo();
+  if (!tipo.contains(tipo_actual)) {
+    error("tipo de dato", "campo");
   }
   advance();
   if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues del tipo\n";
+    error("identificador", "campo");
   }
   advance();
   if (match("=")) {
@@ -133,224 +165,231 @@ void Parser::campo() {
 }
 
 void Parser::fuenteCampo() {
-  if (current->getTokenType() == "columna") {
+  if (match("columna")) {
     advance();
     if (!match("abre_parentesis")) {
-      std::cerr << "Error: se esperaba '(' despues de 'columna'\n";
+      error("(", "fuenteCampo", "simbolo");
     }
     advance();
     if (!match("numero_entero")) {
-      std::cerr << "Error: se esperaba numero en 'columna'\n";
+      error("numero entero", "fuenteCampo", "tipo de dato");
     }
     advance();
     if (!match("cierra_parentesis")) {
-      std::cerr << "Error: se esperaba ')' al cerrar 'columna'\n";
-    }
-    advance();
-  } else if (current->getTokenType() == "regex") {
-    advance();
-    if (!match("abre_parentesis")) {
-      std::cerr << "Error: se esperaba '(' despues de 'regex'\n";
-    }
-    advance();
-    if (!match("literal_cadena")) {
-      std::cerr << "Error: se esperaba cadena en 'regex'\n";
-    }
-    advance();
-    if (!match("cierra_parentesis")) {
-      std::cerr << "Error: se esperaba ')' al cerrar 'regex'\n";
+      error(")", "fuenteCampo", "simbolo");
     }
     advance();
   } else if (match("@")) {
     metadato();
-  } else {
-    std::cerr << "Error: se esperaba 'columna', 'regex' o metadato en fuente "
-                 "de campo\n";
   }
 }
 
 void Parser::defFuncion() {
+  if (!match("funcion"))
+    error("funcion", "defFuncion", "palabra reservada");
   advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de 'funcion'\n";
-  }
+  if (!match("identificador"))
+    error("identificador", "defFuncion");
   advance();
-  if (!match("abre_parentesis")) {
-    std::cerr << "Error: se esperaba '(' en definicion de funcion\n";
-  }
+  if (!match("abre_parentesis"))
+    error("(", "defFuncion", "simbolo");
   advance();
-  if (match("identificador")) {
+  if (match("identificador"))
     parametros();
-  }
-  if (!match("cierra_parentesis")) {
-    std::cerr << "Error: se esperaba ')' en definicion de funcion\n";
-  }
+  if (!match("cierra_parentesis"))
+    error(")", "defFuncion", "simbolo");
   advance();
-  if (!match("abre_llave")) {
-    std::cerr << "Error: se esperaba '{' en cuerpo de funcion\n";
-  }
+  if (!match("abre_llave"))
+    error("{", "defFuncion", "simbolo");
   advance();
   sentencias();
-  if (!match("cierra_llave")) {
-    std::cerr << "Error: se esperaba '}' al cerrar funcion\n";
-  }
+  if (!match("cierra_llave"))
+    error("}", "defFuncion", "simbolo");
   advance();
 }
 
 void Parser::parametros() {
+  if (!match("identificador"))
+    error("identificador", "parametros");
   advance();
   while (match("coma")) {
     advance();
-    if (!match("identificador")) {
-      std::cerr << "Error: se esperaba identificador despues de ','\n";
-    }
+    if (!match("identificador"))
+      error("identificador", "parametros");
     advance();
   }
 }
+void Parser::sentencias() {
+  actualizar_tipo();
+  while (sentencia_map.contains(tipo_actual) || tipo.contains(tipo_actual)) {
+    sentencia();
+    actualizar_tipo();
+  }
+}
 
-void Parser::asignacionFuente() {
-  advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de 'fuente'\n";
-  }
-  advance();
-  if (!match("=")) {
-    std::cerr << "Error: se esperaba '=' en asignacion de fuente\n";
-  }
-  advance();
-  if (!match("abrir")) {
-    std::cerr << "Error: se esperaba 'abrir' en asignacion de fuente\n";
-  }
-  advance();
-  if (!match("abre_parentesis")) {
-    std::cerr << "Error: se esperaba '(' despues de 'abrir'\n";
-  }
-  advance();
-  if (!match("literal_cadena")) {
-    std::cerr << "Error: se esperaba cadena en 'abrir'\n";
-  }
-  advance();
-  if (!match("cierra_parentesis")) {
-    std::cerr << "Error: se esperaba ')' al cerrar 'abrir'\n";
-  }
-  advance();
+void Parser::sentencia() {
+  if (tipo.contains(tipo_actual))
+    asignacion();
+  else
+    sentencia_map[tipo_actual]();
 }
 
 void Parser::asignacion() {
-  std::string tipo = current->getTokenType();
-  if (tipo.contains(tipo)) {
-    advance();
-  }
-  if (!match("identificador")) {
-    std::cerr << "Error se esperaba un identificador en asignacion"
-              << std::endl;
-  }
+  if (tipo.contains(tipo_actual))
+    declaracionVar();
+  else if (match("identificador"))
+    reasignacion();
+  else
+    error("asignacion", "asignacion");
+}
+void Parser::declaracionVar() {
+  if (!tipo.contains(tipo_actual))
+    error("tipo de dato", "declaracionVar");
   advance();
-  if (!match("=")) {
-    std::cerr << "Error: se esperaba '=' en asignacion\n";
-  }
+  if (!match("identificador"))
+    error("identificador", "declaracionVar");
+  advance();
+  if (!match("="))
+    error("=", "simbolo");
   advance();
   expresion();
 }
-
-void Parser::condicional() {
+void Parser::reasignacion() {
+  if (!match("identificador"))
+    error("identificador", "reasignacion");
+  advance();
+  if (!match("="))
+    error("=", "simbolo");
   advance();
   expresion();
-  if (current->getTokenType() != "entonces") {
-    std::cerr << "Error: se esperaba 'entonces' despues de condicion\n";
-  }
+}
+void Parser::condicional() {
+  if (!match("si"))
+    error("si", "condicional", "palabra reservada");
   advance();
-  if (!match("abre_llave")) {
-    std::cerr << "Error: se esperaba '{' en condicional\n";
-  }
+  expresion();
+  if (!match("entonces"))
+    error("entonces", "condicional", "palabra reservada");
+  advance();
+  if (!match("abre_llave"))
+    error("{", "condicional", "simbolo");
   advance();
   sentencias();
-  if (!match("cierra_llave")) {
-    std::cerr << "Error: se esperaba '}' al cerrar condicional\n";
-  }
+  if (!match("cierra_llave"))
+    error("}", "condicional", "simbolo");
   advance();
   sino();
 }
-
 void Parser::sino() {
-  if (current->getTokenType() == "sino") {
+  if (match("entonces")) {
     advance();
-    if (!match("abre_llave")) {
-      std::cerr << "Error: se esperaba '{' despues de 'sino'\n";
-    }
-    advance();
-    sentencias();
-    if (!match("cierra_llave")) {
-      std::cerr << "Error: se esperaba '}' al cerrar 'sino'\n";
-    }
-    advance();
-  } else if (current->getTokenType() == "entonces") {
-    advance();
-    if (current->getTokenType() != "si") {
-      std::cerr << "Error: se esperaba 'si' despues de 'entonces'\n";
-    }
+    if (!match("si"))
+      error("si", "sino", "palabra reservada");
     advance();
     expresion();
-    if (current->getTokenType() != "entonces") {
-      std::cerr << "Error: se esperaba 'entonces' despues de condicion\n";
-    }
+    if (!match("entonces"))
+      error("entonces", "sino", "palabra reservada");
     advance();
-    if (!match("abre_llave")) {
-      std::cerr << "Error: se esperaba '{'\n";
-    }
+    if (!match("abre_llave"))
+      error("{", "sino", "simbolo");
     advance();
     sentencias();
-    if (!match("cierra_llave")) {
-      std::cerr << "Error: se esperaba '}'\n";
-    }
+    if (!match("cierra_llave"))
+      error("}", "sino", "simbolo");
     advance();
     sino();
   }
+  if (match("sino")) {
+    advance();
+    if (!match("abre_llave"))
+      error("{", "sino", "simbolo");
+    advance();
+    sentencias();
+    if (!match("cierra_llave"))
+      error("}", "sino", "simbolo");
+    advance();
+  }
 }
-
-void Parser::escanear() {
-  advance();
-  if (!match("abre_parentesis")) {
-    std::cerr << "Error: se esperaba '(' despues de 'escanear'\n";
+void Parser::expresion() {
+  term();
+  expresionPrime();
+}
+void Parser::expresionPrime() {
+  if (match("+") || match("-") || match("==") || match("||") || match("&&")) {
+    advance();
+    term();
+    expresionPrime();
   }
-  advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador en 'escanear'\n";
+}
+void Parser::term() {
+  factor();
+  termPrime();
+}
+void Parser::termPrime() {
+  if (match("*") || match("/") || match("~~") || match("::")) {
+    factor();
+    termPrime();
   }
+}
+void Parser::factor() {
+  if (match("abre_parentesis")) {
+    expresion();
+    if (!match("cierra_parentesis"))
+      error(")", "factor", "simbolo");
+  } else if (match("$"))
+    contexto();
+  else if (match("@"))
+    metadato();
+  else if (match("escanear"))
+    escanearExpr();
+  else if (match("numero_entero") || match("numero_flotante") ||
+           match("literal_cadena") || match("identificador"))
+    advance();
+  else
+    error("tipo factor", "factor");
+}
+void Parser::escanearExpr() {
+  if (!match("escanear"))
+    error("escanear", "escanearExpr", "palabra reservada");
   advance();
-  if (!match("::")) {
-    std::cerr << "Error: se esperaba '::' en 'escanear'\n";
-  }
+  if (!match("abre_parentesis"))
+    error("(", "escanearExpr", "simbolo");
   advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de '::'\n";
-  }
+  if (!match("identificador"))
+    error("identificador", "escanearExpr");
   advance();
-  if (!match("cierra_parentesis")) {
-    std::cerr << "Error: se esperaba ')' al cerrar 'escanear'\n";
-  }
+  if (!match("::"))
+    error("::", "escanearExpr", "simbolo");
+  advance();
+  if (!match("identificador"))
+    error("identificador", "escanearExpr");
+  advance();
+  if (!match("cierra_parentesis"))
+    error(")", "escanearExpr", "simbolo");
   advance();
   cuerpoEscanear();
 }
-
 void Parser::cuerpoEscanear() {
-  if (current->getTokenType() == "donde") {
-    advance();
-    expresion();
-  }
-  if (match("->")) {
+  if (match("donde"))
+    donde();
+  if (match("->"))
     transformar();
-  }
 }
-
+void Parser::donde() {
+  if (!match("donde"))
+    error("donde", "donde", "palabra reservada");
+  advance();
+  expresion();
+}
 void Parser::transformar() {
+  if (!match("->"))
+    error("->", "transformar", "simbolo");
   advance();
   listaContextos();
-  std::string tipo = current->getTokenType();
-  if (tipo_pipeline.contains(tipo))
+  actualizar_tipo();
+  if (tipo_pipeline.contains(tipo_actual))
     pipeline();
 }
-
 void Parser::listaContextos() {
   contextoOId();
   while (match("coma")) {
@@ -358,150 +397,93 @@ void Parser::listaContextos() {
     contextoOId();
   }
 }
-
 void Parser::contextoOId() {
-  if (match("$")) {
+  if (match("$"))
     contexto();
-  } else if (match("identificador")) {
+  else if (match("identificador"))
     advance();
-  } else {
-    std::cerr << "Error: se esperaba contexto o identificador\n";
-  }
+  else
+    error("contexto o identificador", "contextoOId");
 }
-
-void Parser::contexto() {
-  advance();
-  if (!match("identificador")) {
-    std::cerr << "Error se esperaba identificador despues de contexto\n";
-  }
-  advance();
-}
-
 void Parser::pipeline() {
-  std::string tipo = current->getTokenType();
-  while (tipo_pipeline.contains(tipo)) {
+  actualizar_tipo();
+  while (tipo_pipeline.contains(tipo_actual)) {
     pipelineOp();
-    tipo = current->getTokenType();
   }
 }
-
 void Parser::pipelineOp() {
-  std::string tipo = current->getTokenType();
-  if (tipo == "frecuencia") {
+  if (match("frecuencia")) {
     advance();
-    if (!match("abre_parentesis")) {
-      std::cerr << "Error: se esperaba '(' despues de 'frecuencia'\n";
-    }
+    if (!match("abre_parentesis"))
+      error("(", "pipelineOp", "simbolo");
     advance();
     contextoOId();
-    if (!match("cierra_parentesis")) {
-      std::cerr << "Error: se esperaba ')' al cerrar 'frecuencia'\n";
-    }
+    if (!match("cierra_parentesis"))
+      error(")", "pipelineOp", "simbolo");
     advance();
-  } else if (tipo == "agrupar") {
+  }
+  if (match("agrupar")) {
     advance();
-    if (current->getTokenType() != "por") {
-      std::cerr << "Error: se esperaba 'por' despues de 'agrupar'\n";
-    }
-    advance();
-    contextoOId();
-  } else if (tipo == "ordenar") {
-    advance();
-    if (current->getTokenType() != "por") {
-      std::cerr << "Error: se esperaba 'por' despues de 'ordenar'\n";
-    }
+    if (!match("por"))
+      error("por", "pipelineOp", "palabra reservada");
     advance();
     contextoOId();
-    if (current->getTokenType() == "asc" || current->getTokenType() == "desc") {
+  }
+  if (match("ordenar")) {
+    advance();
+    if (!match("por"))
+      error("por", "pipelineOp", "palabra reservada");
+    advance();
+    if (match("asc") || match("desc"))
       advance();
-    }
-  } else if (tipo == "normalizar") {
+  }
+  if (match("limite")) {
     advance();
-  } else if (tipo == "puntuacion") {
-    advance();
-  } else if (tipo == "limite") {
-    advance();
-    if (!match("numero_entero")) {
-      std::cerr << "Error: se esperaba numero despues de 'limite'\n";
-    }
+    if (!match("numero_entero"))
+      error("numero entero", "pipelineOp", "tipo de dato");
     advance();
   }
+  if (match("normalizar") || match("puntuacion"))
+    advance();
 }
-
-void Parser::mostrar() {
+void Parser::contexto() {
+  if (!match("$"))
+    error("$", "contexto", "simbolo");
   advance();
-  expresion();
-}
-
-void Parser::exportar() {
-  advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de 'exportar'\n";
-  }
-  advance();
-  if (!match("=>")) {
-    std::cerr << "Error: se esperaba '=>' en exportar\n";
-  }
-  advance();
-  if (!match("literal_cadena")) {
-    std::cerr << "Error: se esperaba cadena en exportar\n";
-  }
+  if (!match("identificador"))
+    error("identificador", "contexto");
   advance();
 }
-
-void Parser::retorno() {
-  advance();
-  expresion();
-}
-
-void Parser::expresion() {
-  termino();
-  while (match("+") || match("-") || match("==") || match("||") ||
-         match("&&")) {
-    advance();
-    termino();
-  }
-}
-
-void Parser::termino() {
-  factor();
-  while (match("*") || match("/") || match("~~") || match("::")) {
-    advance();
-    factor();
-  }
-}
-
-void Parser::factor() {
-  if (match("abre_parentesis")) {
-    advance();
-    expresion();
-    if (!match("cierra_parentesis")) {
-      std::cerr << "Error: se esperaba ')' al cerrar expresion\n";
-    }
-    advance();
-  } else if (match("numero_entero") || match("numero_real")) {
-    advance();
-  } else if (match("literal_cadena") || match("literal_caracter")) {
-    advance();
-  } else if (match("$")) {
-    contexto();
-  } else if (match("@")) {
-    metadato();
-  } else if (match("identificador")) {
-    advance();
-  } else if (match("escanear")) {
-    escanear();
-  } else {
-    std::cerr << "Error: factor invalido: '" << current->getTokenType()
-              << "'\n";
-    advance();
-  }
-}
-
 void Parser::metadato() {
+  if (!match("@"))
+    error("@", "metadato", "simbolo");
   advance();
-  if (!match("identificador")) {
-    std::cerr << "Error: se esperaba identificador despues de '@'\n";
-  }
+  if (!match("identificador"))
+    error("identificador", "metadato");
   advance();
+}
+void Parser::mostrar() {
+  if (!match("mostrar"))
+    error("mostrar", "mostrar", "palabra reservada");
+  advance();
+  expresion();
+}
+void Parser::exportar() {
+  if (!match("exportar"))
+    error("exportar", "exportar", "palabra reservada");
+  advance();
+  if (!match("identificador"))
+    error("identificador", "exportar");
+  advance();
+  if (!match("=>"))
+    error("=>", "exportar", "simbolo");
+  advance();
+  if (!match("literal_cadena"))
+    error("cadena de caracteres", "exportar", "tipo de dato");
+  advance();
+}
+void Parser::retorno() {
+  if (!match("retornar"))
+    error("retornar", "retorno", "palabra reservada");
+  expresion();
 }
