@@ -5,7 +5,7 @@
 
 int main() {
   Lexer lexer;
-  std::string filename = "../docs/test3.txt";
+  std::string filename = "../docs/test1.txt";
 
   lexer.analizeFile(filename);
   lexer.printTokenList();
