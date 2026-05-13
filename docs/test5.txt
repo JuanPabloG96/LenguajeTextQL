@@ -1,0 +1,15 @@
+fuente registros = abrir("logs/*.log")
+
+esquema formato_salida {
+    texto   ip,
+    texto   ruta,
+}
+
+funcion filtrar_errores() {
+    lista error = escanear(registros :: formato_salida)
+        $ip, $ruta, $estado, $num_linea origen
+
+    si $estado == 500 entonces {
+        mostrar "Error critico detectado."
+    }
+}

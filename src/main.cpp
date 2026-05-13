@@ -5,12 +5,13 @@
 
 int main() {
   Lexer lexer;
-  std::string filename = "../docs/test1.txt";
+  std::string filename = "../docs/test5.txt";
 
   lexer.analizeFile(filename);
-  lexer.printTokenList();
+  lexer.printErrors();
 
   Parser parser(lexer.getTokenList());
   parser.parse();
+
   return 0;
 }

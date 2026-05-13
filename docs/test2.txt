@@ -10,7 +10,7 @@ esquema formato_salida {
 }
 
 funcion filtrar_errores() {
-    lista errores = escanear(registros :: formato_salida)
+    lista error = escanear(registros :: formato_salida)
         donde $estado == 401 || $estado == 403
         -> $ip, $ruta, $estado, $num_linea, $origen
 

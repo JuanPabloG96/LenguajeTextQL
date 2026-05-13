@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "List.hpp"
+#include "NodoAST.hpp"
 
 class Parser {
  private:
@@ -61,7 +62,16 @@ class Parser {
   // mostrar errores
   void error(std::string esperado, std::string funcion, std::string tipo);
 
+  // parametros y funciones para arbol AST
+  std::shared_ptr<NodoAST> raiz;
+  std::shared_ptr<NodoAST> nodoActual;
+
+  void pushNodo(const std::string& tipo, const std::string& valor = "");
+  void popNodo(std::shared_ptr<NodoAST> padre);
+
  public:
   Parser(const List& tokenList);
   void parse();
+  // funcion para arbol AST
+  std::shared_ptr<NodoAST> getRaiz() const;
 };
