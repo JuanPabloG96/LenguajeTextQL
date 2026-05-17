@@ -8,7 +8,7 @@
 #include "Data/LexerData.hpp"
 #include "Data/TransitionMatrix.hpp"
 
-Lexer::Lexer() : state(0), category(0), line(1), column(0) {
+Lexer::Lexer() : state(0), category(0), line(1), column(-1) {
 }
 
 void Lexer::analizeFile(std::string& filename) {
@@ -22,6 +22,11 @@ void Lexer::analizeFile(std::string& filename) {
   Lexer lexer;
 
   while (archivo.get(c)) {
+    if (c == '\n') {
+      line++;
+      column = -1;
+    } else
+      column++;
     createTokenList(c);
   }
   archivo.close();
@@ -73,12 +78,6 @@ void Lexer::createTokenList(char c) {
   } else {
     buffer += c;
   }
-
-  if (c == '\n') {
-    line++;
-    column = 0;
-  } else
-    column++;
 }
 
 void Lexer::lexerFinish() {

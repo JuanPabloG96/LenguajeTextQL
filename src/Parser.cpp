@@ -58,7 +58,7 @@ void Parser::error(std::string esperado,
             << esperado << "', en linea " << current->getLine() << " columna "
             << current->getColumn() << ", Token: " << current->getToken()
             << std::endl;
-  // std::exit(0);
+  std::exit(0);
 }
 
 // funciones del arbol AST

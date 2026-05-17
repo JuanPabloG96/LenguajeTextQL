@@ -14,7 +14,7 @@ funcion filtrar_errores() {
         donde $estado == 401 || $estado == 403
         -> $ip, $ruta, $estado, $num_linea, $origen
 
-    si $estado == 500 entonces {
+    $estado == 500 entonces {
         mostrar "Error critico detectado."
     } entonces si $estado == 401 || $estado == 403 entonces {
         mostrar errores
