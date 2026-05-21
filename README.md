@@ -1,2 +1,2 @@
 # LenguajeTextQL
-analisador lexico para lenguaje en c++
+analisador lexico y parser para lenguaje en c++
