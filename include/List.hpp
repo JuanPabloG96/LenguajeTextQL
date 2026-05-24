@@ -1,19 +1,20 @@
 #pragma once
 
-#include <string>
-
 #include "Node.hpp"
 
-class List {
- private:
-  Node* head;
-  Node* current;
+#include <string>
 
- public:
-  List();
-  ~List();
-  void add(std::string type, std::string token, int line, int column);
-  void show() const;
+class List
+{
+private:
+    Node* head;
+    Node* current;
 
-  Node* getHead() const;
+public:
+    List();
+    ~List();
+    void add(std::string type, std::string token, int line, int column);
+    void show() const;
+
+    Node* getHead() const;
 };

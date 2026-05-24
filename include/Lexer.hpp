@@ -1,35 +1,37 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "Data/TransitionMatrix.hpp"
 #include "List.hpp"
 
-struct LexicalErrors {
-  int line;
-  int column;
-  std::string message;
-  std::string lexeme;
+#include <string>
+#include <vector>
+
+struct LexicalErrors
+{
+    int line;
+    int column;
+    std::string message;
+    std::string lexeme;
 };
 
-class Lexer {
+class Lexer
+{
 private:
-  int state;
-  int category;
-  int line;
-  int column;
-  std::string buffer;
-  List TokenList;
-  std::vector<LexicalErrors> errors;
+    int state;
+    int category;
+    int line;
+    int column;
+    std::string buffer;
+    List TokenList;
+    std::vector<LexicalErrors> errors;
 
 public:
-  Lexer();
-  void analizeFile(std::string &filename);
-  Symbol classifyChar(char c);
-  void createTokenList(char c);
-  void lexerFinish();
-  void printTokenList();
-  void printErrors();
-  const List& getTokenList() const;
+    Lexer();
+    void analizeFile(std::string& filename);
+    Symbol classifyChar(char c);
+    void createTokenList(char c);
+    void lexerFinish();
+    void printTokenList();
+    void printErrors();
+    const List& getTokenList() const;
 };
